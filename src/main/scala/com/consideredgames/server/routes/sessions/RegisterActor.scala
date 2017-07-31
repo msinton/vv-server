@@ -41,11 +41,16 @@ class RegisterActor(implicit val executionContext: ExecutionContext) extends Act
       Future(RegisterResponseInvalid(List("try again later")))
   }
 
-  private def createUserAndResponse(username: String, email: String, passwordHash: String, ip: String) = {
-    val recoverStrategy = handleEmailTaken orElse handleUsernameTaken(username) orElse handleFailureDefault
-    val hashedHash = EncryptionUtils.encrypt(passwordHash)
+  private def createHash(password: String): String = {
+    val salt = EncryptionUtils.generateSalt()
+    EncryptionUtils.hashPassword(password, salt)
+  }
 
-    (UserDao.insert(username, email.toLowerCase, hashedHash) map { _ =>
+  private def createUserAndResponse(username: String, email: String, password: String, ip: String) = {
+    val recoverStrategy = handleEmailTaken orElse handleUsernameTaken(username) orElse handleFailureDefault
+    val hash = createHash(password)
+
+    (UserDao.insert(username, email.toLowerCase, hash) map { _ =>
       SessionUtils.prepareSession(username, ip)} map (RegisterResponseSuccess(username, _))
     ) recoverWith recoverStrategy
   }

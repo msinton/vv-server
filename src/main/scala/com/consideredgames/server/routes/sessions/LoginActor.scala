@@ -21,7 +21,7 @@ class LoginActor(implicit val executionContext: ExecutionContext) extends Actor 
 
   private def authenticateUserAndResponse(username: String, passwordHash: String, email: String, ip: String) = {
     UserDao.get(username, email.toLowerCase) collect {
-      case User(_, _, _, h) if EncryptionUtils.isPasswordMatch(passwordHash, h) => handleIsAuthenticated(username, ip)
+      case User(_, _, _, h) if EncryptionUtils.validatePassword(passwordHash, h) => handleIsAuthenticated(username, ip)
       case _: User => LoginResponseInvalid(List("password incorrect"))
       case _ => LoginResponseInvalid(List("user not found"))
     }

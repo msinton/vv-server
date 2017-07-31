@@ -8,8 +8,6 @@ import com.consideredgames.server.game.tasks.{AddPlayer, GameFull, StartGame}
 
 import scala.util.Random
 
-case class State(players: Map[String, PlaceholderPlayer])
-
 /**
   * Created by matt on 14/07/17.
   */
@@ -19,8 +17,6 @@ class GameActor(gameId: String, request: NewGameRequest) extends Actor {
   private val playerWorkers = collection.mutable.LinkedHashMap[String, ActorRef]()
   private val playerColours = collection.mutable.LinkedHashMap[String, PlayerColour]()
   private val random = new Random()
-  private var state: State = _
-
 
   private def resolveColour(colour: PlayerColour) = {
     val takenColours = playerColours.values.toList
